@@ -5,8 +5,23 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+//const socketIO = require('socket.io');
 
+const http = require('http');
+const socketIO = require('socket.io');
+
+// After creating the express app
 const app = express();
+const server = http.createServer(app);
+
+//Socket.io setup with CORS
+const io = socketIO(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
 
 const corsOptions = {
   origin: 'http://localhost:3000',  // Allow frontend origin
@@ -29,6 +44,8 @@ mongoose.connect(process.env.MONGODB_URI)
 // Import models
 const Family = require('./models/family');
 const User = require('./models/user');
+const GroceryItem = require('./models/GroceryItem');  // Add this
+const Event = require('./models/event');
 
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
@@ -48,7 +65,35 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
+// Socket.io authentication middleware (add after your JWT middleware)
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error('Authentication error'));
+  }
 
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return next(new Error('Authentication error'));
+    }
+    socket.userId = decoded.user._id;
+    socket.familyId = decoded.familyId;
+    next();
+  });
+});
+
+// Socket.io connection handling
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.userId);
+  
+  // Join family room
+  socket.join(`family:${socket.familyId}`);
+  
+  // Handle disconnect
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.userId);
+  });
+});
 // Routes
 
 // Test route
@@ -384,8 +429,151 @@ app.get('/api/family/members', authenticateToken, async (req, res) => {
   }
 });
 
+// Get grocery items
+app.get('/api/grocery', authenticateToken, async (req, res) => {
+  try {
+    const { completed = 'false', category } = req.query;
+
+    const query = { 
+      familyId: req.familyId,
+      completed: completed === 'true'
+    };
+    if (category) query.category = category;
+
+    const items = await GroceryItem.find(query)
+      .populate('addedBy', 'fullName')
+      .populate('completedBy', 'fullName')
+      .populate('assignedTo', 'fullName')
+      .sort({ priority: -1, createdAt: -1 });
+
+    res.json({
+      error: false,
+      items
+    });
+
+  } catch (error) {
+    console.error('Get grocery items error:', error);
+    res.status(500).json({ 
+      error: true, 
+      message: 'Failed to get grocery items' 
+    });
+  }
+});
+
+// Add grocery item
+app.post('/api/grocery', authenticateToken, async (req, res) => {
+  try {
+    const item = new GroceryItem({
+      ...req.body,
+      addedBy: req.user._id,
+      familyId: req.familyId
+    });
+
+    await item.save();
+    await item.populate(['addedBy', 'assignedTo'], 'fullName');
+
+    // Emit to all family members
+    io.to(`family:${req.familyId}`).emit('grocery_item_added', item);
+
+    res.json({
+      error: false,
+      message: 'Item added to grocery list',
+      item
+    });
+
+  } catch (error) {
+    console.error('Add grocery item error:', error);
+    res.status(500).json({ 
+      error: true, 
+      message: 'Failed to add item' 
+    });
+  }
+});
+
+// Update grocery item
+app.put('/api/grocery/:itemId', authenticateToken, async (req, res) => {
+  try {
+    const item = await GroceryItem.findOne({
+      _id: req.params.itemId,
+      familyId: req.familyId
+    });
+
+    if (!item) {
+      return res.status(404).json({ 
+        error: true, 
+        message: 'Item not found' 
+      });
+    }
+
+    // Handle completion
+    if (req.body.completed !== undefined) {
+      item.completed = req.body.completed;
+      if (req.body.completed) {
+        item.completedBy = req.user._id;
+        item.completedAt = new Date();
+      } else {
+        item.completedBy = null;
+        item.completedAt = null;
+      }
+    }
+
+    // Update other fields
+    Object.assign(item, req.body);
+    await item.save();
+    await item.populate(['addedBy', 'completedBy', 'assignedTo'], 'fullName');
+
+    // Emit update to all family members
+    io.to(`family:${req.familyId}`).emit('grocery_item_updated', item);
+
+    res.json({
+      error: false,
+      message: 'Item updated',
+      item
+    });
+
+  } catch (error) {
+    console.error('Update grocery item error:', error);
+    res.status(500).json({ 
+      error: true, 
+      message: 'Failed to update item' 
+    });
+  }
+});
+
+// Delete grocery item
+app.delete('/api/grocery/:itemId', authenticateToken, async (req, res) => {
+  try {
+    const result = await GroceryItem.deleteOne({
+      _id: req.params.itemId,
+      familyId: req.familyId
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ 
+        error: true, 
+        message: 'Item not found' 
+      });
+    }
+
+    // Emit deletion to all family members
+    io.to(`family:${req.familyId}`).emit('grocery_item_deleted', req.params.itemId);
+
+    res.json({
+      error: false,
+      message: 'Item deleted'
+    });
+
+  } catch (error) {
+    console.error('Delete grocery item error:', error);
+    res.status(500).json({ 
+      error: true, 
+      message: 'Failed to delete item' 
+    });
+  }
+});
+
 // Start server
 const PORT = process.env.PORT || 5050;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
