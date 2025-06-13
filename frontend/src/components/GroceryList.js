@@ -4,7 +4,7 @@ import { useSocket } from '../contexts/SocketContext';
 import axiosInstance from '../utils/axios';
 import { FiPlus, FiCheck, FiX, FiShoppingCart, FiEdit2, FiTrash2 } from 'react-icons/fi';
 
-const GroceryList = () => {
+const GroceryList = ({ setGroceryCount }) => {
   const { socket } = useSocket();
   const [items, setItems] = useState([]);
   const [completedItems, setCompletedItems] = useState([]);
@@ -187,10 +187,17 @@ const GroceryList = () => {
     const cat = categories.find(c => c.value === category);
     return cat?.icon || '📦';
   };
-
+  
   const filteredItems = selectedCategory === 'all' 
-    ? items 
-    : items.filter(item => item.category === selectedCategory);
+  ? items 
+  : items.filter(item => item.category === selectedCategory);
+  useEffect(() => {
+    // Update count when items change
+    const filtered = selectedCategory === 'all' 
+      ? items 
+      : items.filter(item => item.category === selectedCategory);
+    setGroceryCount?.(filtered.length);
+  }, [items, selectedCategory]);
 
   if (loading) {
     return (

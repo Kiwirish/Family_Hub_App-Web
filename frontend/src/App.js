@@ -12,6 +12,8 @@ import Dashboard from './pages/Dashboard';
 import LoadingScreen from './components/LoadingScreen';
 import axiosInstance from './utils/axios';
 import './App.css';
+import { SocketProvider } from './contexts/SocketContext';
+import GroceryList from './components/GroceryList';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -38,13 +40,25 @@ function App() {
 
   return (
     <Router>
+      <SocketProvider>
       <Routes>
         <Route path="/" element={!isAuthenticated ? <FamilyLanding /> : <Navigate to="/dashboard" />} />
         <Route path="/create-family" element={!isAuthenticated ? <CreateFamily setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
         <Route path="/join-family" element={!isAuthenticated ? <JoinFamily setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
         <Route path="/login" element={!isAuthenticated ? <Login setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={isAuthenticated ? <Dashboard setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/" />} />
+        <Route 
+            path="/grocery" 
+            element={
+              isAuthenticated ? (
+                <GroceryList setIsAuthenticated={setIsAuthenticated} />
+              ) : (
+                <Navigate to="/" />
+              )
+            } 
+          />
       </Routes>
+      </SocketProvider>
     </Router>
   );
 }
