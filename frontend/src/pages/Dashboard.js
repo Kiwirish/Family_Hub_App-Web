@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axios';
+import { Link } from 'react-router-dom';
 
 const Dashboard = ({setIsAuthenticated}) => {
   const navigate = useNavigate();
@@ -10,10 +11,21 @@ const Dashboard = ({setIsAuthenticated}) => {
   const [familyMembers, setFamilyMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [activeGroceryItems, setActiveGroceryItems] = useState([]);
 
   useEffect(() => {
     fetchUserAndFamily();
+    fetchActiveGroceryItems();
   }, []);
+
+  const fetchActiveGroceryItems = async () => {
+    try {
+      const response = await axiosInstance.get('/grocery?completed=false');
+      setActiveGroceryItems(response.data.items);
+    } catch (error) {
+      console.error('Failed to fetch grocery items:', error);
+    }
+  };
 
   const fetchUserAndFamily = async () => {
     try {
@@ -106,7 +118,7 @@ const Dashboard = ({setIsAuthenticated}) => {
           />
           <StatCard 
             title="Shopping Items" 
-            value="0" 
+            value={activeGroceryItems.length}
             icon="🛒" 
             color="from-green-500 to-green-600" 
           />
@@ -128,13 +140,16 @@ const Dashboard = ({setIsAuthenticated}) => {
             color="from-blue-500 to-blue-600"
             comingSoon={true}
           />
+          <Link to="/grocery">
           <FeatureCard
+            
             title="Shopping List"
             description="Keep track of what the family needs"
             icon="🛒"
             color="from-green-500 to-green-600"
-            comingSoon={true}
+            comingSoon={false}
           />
+          </Link>
           <FeatureCard
             title="Family Chat"
             description="Stay connected with real-time messaging"
