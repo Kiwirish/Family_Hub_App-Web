@@ -14,6 +14,7 @@ import axiosInstance from './utils/axios';
 import './App.css';
 import { SocketProvider } from './contexts/SocketContext';
 import GroceryList from './components/GroceryList';
+import Calendar from './components/Calendar';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -52,6 +53,16 @@ function App() {
             element={
               isAuthenticated ? (
                 <GroceryList setIsAuthenticated={setIsAuthenticated} />
+              ) : (
+                <Navigate to="/" />
+              )
+            } 
+          />
+          <Route 
+            path="/calendar" 
+            element={
+              isAuthenticated ? (
+                <Calendar setIsAuthenticated={setIsAuthenticated} />
               ) : (
                 <Navigate to="/" />
               )

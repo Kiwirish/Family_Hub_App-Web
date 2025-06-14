@@ -572,6 +572,134 @@ app.delete('/api/grocery/:itemId', authenticateToken, async (req, res) => {
   }
 });
 
+// calander routes !! 
+app.get('/api/events', authenticateToken, async (req, res) => {
+  try {
+    const { startDate, endDate, category } = req.query;
+
+    const query = { familyId: req.familyId };
+    
+    if (startDate && endDate) {
+      query.startDate = { $gte: new Date(startDate) };
+      query.endDate = { $lte: new Date(endDate) };
+    }
+    
+    if (category) query.category = category;
+
+    const events = await Event.find(query)
+      .populate('createdBy', 'fullName')
+      .populate('attendees.user', 'fullName')
+      .sort({ startDate: 1 });
+
+    res.json({
+      error: false,
+      events
+    });
+
+  } catch (error) {
+    console.error('Get events error:', error);
+    res.status(500).json({ 
+      error: true, 
+      message: 'Failed to get events' 
+    });
+  }
+});
+
+// Create event
+app.post('/api/events', authenticateToken, async (req, res) => {
+  try {
+    const event = new Event({
+      ...req.body,
+      createdBy: req.user._id,
+      familyId: req.familyId
+    });
+
+    // Add creator as attendee with accepted status
+    event.attendees.push({
+      user: req.user._id,
+      response: 'accepted'
+    });
+
+    await event.save();
+    await event.populate(['createdBy', 'attendees.user'], 'fullName');
+
+    // Emit to all family members
+    io.to(`family:${req.familyId}`).emit('event_created', event);
+
+    res.json({
+      error: false,
+      message: 'Event created',
+      event
+    });
+
+  } catch (error) {
+    console.error('Create event error:', error);
+    res.status(500).json({ 
+      error: true, 
+      message: 'Failed to create event' 
+    });
+  }
+});
+
+// Update event RSVP
+app.post('/api/events/:eventId/rsvp', authenticateToken, async (req, res) => {
+  try {
+    const { response } = req.body;
+
+    if (!['accepted', 'declined', 'maybe'].includes(response)) {
+      return res.status(400).json({ 
+        error: true, 
+        message: 'Invalid response' 
+      });
+    }
+
+    const event = await Event.findOne({
+      _id: req.params.eventId,
+      familyId: req.familyId
+    });
+
+    if (!event) {
+      return res.status(404).json({ 
+        error: true, 
+        message: 'Event not found' 
+      });
+    }
+
+    // Find or create attendee entry
+    let attendee = event.attendees.find(
+      a => a.user.toString() === req.user._id
+    );
+
+    if (attendee) {
+      attendee.response = response;
+    } else {
+      event.attendees.push({
+        user: req.user._id,
+        response
+      });
+    }
+
+    await event.save();
+    await event.populate('attendees.user', 'fullName');
+
+    // Emit update to all family members
+    io.to(`family:${req.familyId}`).emit('event_updated', event);
+
+    res.json({
+      error: false,
+      message: 'RSVP updated',
+      event
+    });
+
+  } catch (error) {
+    console.error('Update RSVP error:', error);
+    res.status(500).json({ 
+      error: true, 
+      message: 'Failed to update RSVP' 
+    });
+  }
+});
+
 // Start server
 const PORT = process.env.PORT || 5050;
 server.listen(PORT, () => {

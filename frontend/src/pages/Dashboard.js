@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axios';
 import { Link } from 'react-router-dom';
+import Calendar from '../components/Calendar';
+
 
 const Dashboard = ({setIsAuthenticated}) => {
   const navigate = useNavigate();
@@ -12,6 +14,7 @@ const Dashboard = ({setIsAuthenticated}) => {
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [activeGroceryItems, setActiveGroceryItems] = useState([]);
+
 
   useEffect(() => {
     fetchUserAndFamily();
@@ -157,13 +160,15 @@ const Dashboard = ({setIsAuthenticated}) => {
             color="from-purple-500 to-purple-600"
             comingSoon={true}
           />
+          <Link to="/calendar">
           <FeatureCard
             title="Calendar"
             description="Track family events and appointments"
             icon="📅"
             color="from-orange-500 to-orange-600"
-            comingSoon={true}
+            comingSoon={false}
           />
+          </Link>
           <FeatureCard
             title="Meal Planner"
             description="Plan weekly meals together"
