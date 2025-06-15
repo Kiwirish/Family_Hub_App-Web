@@ -1,8 +1,12 @@
-// frontend/src/components/GroceryList.js
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../contexts/SocketContext';
 import axiosInstance from '../utils/axios';
-import { FiPlus, FiCheck, FiX, FiShoppingCart, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import { 
+  FiPlus, FiCheck, FiX, FiShoppingCart, FiEdit2, FiTrash2,
+  FiArrowLeft, FiFilter, FiClock, FiUser, FiRepeat,
+  FiPackage, FiMoreVertical
+} from 'react-icons/fi';
 
 const GroceryList = ({ setGroceryCount }) => {
   const { socket } = useSocket();
@@ -31,14 +35,9 @@ const GroceryList = ({ setGroceryCount }) => {
     { value: 'produce', label: 'Produce', icon: '🥬' },
     { value: 'dairy', label: 'Dairy', icon: '🥛' },
     { value: 'meat', label: 'Meat', icon: '🥩' },
-    { value: 'seafood', label: 'Seafood', icon: '🐟' },
     { value: 'bakery', label: 'Bakery', icon: '🍞' },
-    { value: 'frozen', label: 'Frozen', icon: '🧊' },
     { value: 'pantry', label: 'Pantry', icon: '🥫' },
-    { value: 'beverages', label: 'Beverages', icon: '🥤' },
-    { value: 'snacks', label: 'Snacks', icon: '🍿' },
     { value: 'household', label: 'Household', icon: '🧹' },
-    { value: 'personal care', label: 'Personal Care', icon: '🧴' },
     { value: 'other', label: 'Other', icon: '📦' }
   ];
 
@@ -176,10 +175,10 @@ const GroceryList = ({ setGroceryCount }) => {
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return 'text-red-600 bg-red-50';
-      case 'medium': return 'text-yellow-600 bg-yellow-50';
-      case 'low': return 'text-green-600 bg-green-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'high': return 'text-red-700 bg-red-50 border-red-200';
+      case 'medium': return 'text-amber-700 bg-amber-50 border-amber-200';
+      case 'low': return 'text-green-700 bg-green-50 border-green-200';
+      default: return 'text-gray-700 bg-gray-50 border-gray-200';
     }
   };
 
@@ -189,196 +188,255 @@ const GroceryList = ({ setGroceryCount }) => {
   };
   
   const filteredItems = selectedCategory === 'all' 
-  ? items 
-  : items.filter(item => item.category === selectedCategory);
+    ? items 
+    : items.filter(item => item.category === selectedCategory);
+
   useEffect(() => {
-    // Update count when items change
     const filtered = selectedCategory === 'all' 
       ? items 
       : items.filter(item => item.category === selectedCategory);
     setGroceryCount?.(filtered.length);
-  }, [items, selectedCategory]);
+  }, [items, selectedCategory, setGroceryCount]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading shopping list...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Grocery List</h2>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-        >
-          <FiPlus className="w-5 h-5" />
-          <span>Add Item</span>
-        </button>
-      </div>
-
-      {/* Category Filter */}
-      <div className="flex space-x-2 overflow-x-auto pb-4 mb-6">
-        {categories.map(category => (
-          <button
-            key={category.value}
-            onClick={() => setSelectedCategory(category.value)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
-              selectedCategory === category.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <span>{category.icon}</span>
-            <span>{category.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Active Items */}
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <FiShoppingCart className="w-5 h-5 mr-2" />
-          Shopping List ({filteredItems.length})
-        </h3>
-        
-        {filteredItems.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">
-            {selectedCategory === 'all' 
-              ? 'No items in your shopping list' 
-              : 'No items in this category'}
-          </p>
-        ) : (
-          <div className="grid gap-3">
-            {filteredItems.map(item => (
-              <div
-                key={item._id}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start space-x-3">
-                  <button
-                    onClick={() => handleToggleComplete(item)}
-                    className="mt-1 w-5 h-5 rounded border-2 border-gray-300 hover:border-blue-500 flex items-center justify-center flex-shrink-0"
-                  >
-                    {item.completed && <FiCheck className="w-3 h-3 text-blue-600" />}
-                  </button>
-
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-medium text-gray-900 flex items-center space-x-2">
-                          <span>{getCategoryIcon(item.category)}</span>
-                          <span>{item.name}</span>
-                          <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(item.priority)}`}>
-                            {item.priority}
-                          </span>
-                        </h4>
-                        <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600">
-                          <span>{item.quantity} {item.unit}</span>
-                          {item.assignedTo && (
-                            <span className="flex items-center space-x-1">
-                              <span>Assigned to:</span>
-                              <span className="font-medium">{item.assignedTo.fullName}</span>
-                            </span>
-                          )}
-                          {item.recurring && (
-                            <span className="text-blue-600">🔄 {item.recurringFrequency}</span>
-                          )}
-                        </div>
-                        {item.notes && (
-                          <p className="text-sm text-gray-500 mt-1">{item.notes}</p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center space-x-2 ml-4">
-                        <button
-                          onClick={() => startEdit(item)}
-                          className="p-1 text-gray-500 hover:text-blue-600"
-                        >
-                          <FiEdit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item._id)}
-                          className="p-1 text-gray-500 hover:text-red-600"
-                        >
-                          <FiTrash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <Link to="/dashboard">
+                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
+                  <FiArrowLeft className="w-5 h-5" />
+                </button>
+              </Link>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Grocery List</h1>
+                <p className="text-sm text-gray-500">Manage your shopping needs</p>
               </div>
-            ))}
+            </div>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2"
+            >
+              <FiPlus className="w-4 h-4" />
+              <span>Add Item</span>
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      </header>
 
-      {/* Completed Items */}
-      {completedItems.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <FiCheck className="w-5 h-5 mr-2" />
-            Recently Completed ({completedItems.length})
-          </h3>
-          
-          <div className="grid gap-2">
-            {completedItems.slice(0, 5).map(item => (
-              <div
-                key={item._id}
-                className="bg-gray-50 rounded-lg p-3 opacity-60"
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Category Filter */}
+        <div className="bg-white rounded-xl p-4 mb-6 border border-gray-100">
+          <div className="flex items-center space-x-2 overflow-x-auto scrollbar-hide">
+            {categories.map((category) => (
+              <button
+                key={category.value}
+                onClick={() => setSelectedCategory(category.value)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                  selectedCategory === category.value
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
               >
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={() => handleToggleComplete(item)}
-                    className="w-5 h-5 rounded border-2 border-green-500 bg-green-500 flex items-center justify-center flex-shrink-0"
-                  >
-                    <FiCheck className="w-3 h-3 text-white" />
-                  </button>
-                  
-                  <div className="flex-1">
-                    <span className="line-through text-gray-600">
-                      {getCategoryIcon(item.category)} {item.name} - {item.quantity} {item.unit}
-                    </span>
-                    <span className="text-xs text-gray-500 ml-2">
-                      by {item.completedBy?.fullName}
-                    </span>
-                  </div>
-                  
-                  <button
-                    onClick={() => handleDelete(item._id)}
-                    className="p-1 text-gray-400 hover:text-red-600"
-                  >
-                    <FiTrash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+                <span>{category.icon}</span>
+                <span>{category.label}</span>
+                {selectedCategory === category.value && (
+                  <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md text-xs font-medium">
+                    {category.value === 'all' ? items.length : items.filter(item => item.category === category.value).length}
+                  </span>
+                )}
+              </button>
             ))}
           </div>
         </div>
-      )}
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Active Items */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <FiShoppingCart className="w-5 h-5 mr-2 text-emerald-600" />
+                  Shopping List
+                  <span className="ml-auto text-sm font-normal text-gray-500">
+                    {filteredItems.length} items
+                  </span>
+                </h2>
+              </div>
+              
+              <div className="divide-y divide-gray-100">
+                {filteredItems.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <div className="text-4xl mb-4">{getCategoryIcon(selectedCategory)}</div>
+                    <p className="text-gray-500">
+                      {selectedCategory === 'all' 
+                        ? 'Your shopping list is empty' 
+                        : 'No items in this category'}
+                    </p>
+                    <button
+                      onClick={() => setShowAddModal(true)}
+                      className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium text-sm"
+                    >
+                      Add your first item →
+                    </button>
+                  </div>
+                ) : (
+                  filteredItems.map((item) => (
+                    <div key={item._id} className="p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start space-x-3">
+                        <button
+                          onClick={() => handleToggleComplete(item)}
+                          className="mt-0.5 w-5 h-5 rounded border-2 border-gray-300 hover:border-emerald-500 transition-colors flex items-center justify-center flex-shrink-0"
+                        >
+                          {item.completed && <FiCheck className="w-3 h-3 text-emerald-600" />}
+                        </button>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <span className="text-lg">{getCategoryIcon(item.category)}</span>
+                                <h4 className="font-medium text-gray-900">{item.name}</h4>
+                                <span className={`text-xs px-2 py-0.5 rounded-md border ${getPriorityColor(item.priority)}`}>
+                                  {item.priority}
+                                </span>
+                              </div>
+                              
+                              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                                <span className="flex items-center space-x-1">
+                                  <FiPackage className="w-3.5 h-3.5" />
+                                  <span>{item.quantity} {item.unit}</span>
+                                </span>
+                                
+                                {item.assignedTo && (
+                                  <span className="flex items-center space-x-1">
+                                    <FiUser className="w-3.5 h-3.5" />
+                                    <span>{item.assignedTo.fullName}</span>
+                                  </span>
+                                )}
+                                
+                                {item.recurring && (
+                                  <span className="flex items-center space-x-1 text-indigo-600">
+                                    <FiRepeat className="w-3.5 h-3.5" />
+                                    <span>{item.recurringFrequency}</span>
+                                  </span>
+                                )}
+                              </div>
+                              
+                              {item.notes && (
+                                <p className="text-sm text-gray-600 mt-2">
+                                  {item.notes}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex items-center space-x-1 ml-4">
+                              <button
+                                onClick={() => startEdit(item)}
+                                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-all"
+                              >
+                                <FiEdit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(item._id)}
+                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                              >
+                                <FiTrash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Completed Items */}
+          <div>
+            <div className="bg-white rounded-xl border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <h3 className="font-semibold text-gray-900 flex items-center">
+                  <FiCheck className="w-5 h-5 mr-2 text-gray-400" />
+                  Recently Completed
+                  <span className="ml-auto text-sm font-normal text-gray-500">
+                    {completedItems.length}
+                  </span>
+                </h3>
+              </div>
+              
+              <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
+                {completedItems.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">No completed items</p>
+                ) : (
+                  completedItems.slice(0, 10).map((item) => (
+                    <div key={item._id} className="flex items-center space-x-3 py-2">
+                      <button
+                        onClick={() => handleToggleComplete(item)}
+                        className="w-5 h-5 rounded border-2 border-emerald-500 bg-emerald-500 flex items-center justify-center flex-shrink-0"
+                      >
+                        <FiCheck className="w-3 h-3 text-white" />
+                      </button>
+                      
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-500 line-through truncate">
+                          {getCategoryIcon(item.category)} {item.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          by {item.completedBy?.fullName}
+                        </p>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      >
+                        <FiTrash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
 
       {/* Add/Edit Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              {editingItem ? 'Edit Item' : 'Add Item'}
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">
+              {editingItem ? 'Edit Item' : 'Add New Item'}
             </h3>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Item Name *
+                  Item Name
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="e.g., Milk, Bread, Apples..."
                   required
                 />
               </div>
@@ -392,7 +450,7 @@ const GroceryList = ({ setGroceryCount }) => {
                     type="text"
                     value={formData.quantity}
                     onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
                 
@@ -403,7 +461,7 @@ const GroceryList = ({ setGroceryCount }) => {
                   <select
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     {units.map(unit => (
                       <option key={unit} value={unit}>{unit}</option>
@@ -419,7 +477,7 @@ const GroceryList = ({ setGroceryCount }) => {
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 >
                   {categories.filter(c => c.value !== 'all').map(category => (
                     <option key={category.value} value={category.value}>
@@ -433,15 +491,24 @@ const GroceryList = ({ setGroceryCount }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Priority
                 </label>
-                <select
-                  value={formData.priority}
-                  onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
+                <div className="grid grid-cols-3 gap-2">
+                  {['low', 'medium', 'high'].map((priority) => (
+                    <button
+                      key={priority}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, priority })}
+                      className={`py-2 rounded-lg font-medium capitalize transition-colors ${
+                        formData.priority === priority
+                          ? priority === 'high' ? 'bg-red-100 text-red-700 border border-red-200' :
+                            priority === 'medium' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                            'bg-green-100 text-green-700 border border-green-200'
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {priority}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
@@ -451,7 +518,7 @@ const GroceryList = ({ setGroceryCount }) => {
                 <select
                   value={formData.assignedTo}
                   onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 >
                   <option value="">Anyone</option>
                   {familyMembers.map(member => (
@@ -470,8 +537,8 @@ const GroceryList = ({ setGroceryCount }) => {
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   rows="2"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Any specific brand, store, etc."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                  placeholder="Any specific brand, store, or other details..."
                 />
               </div>
 
@@ -481,7 +548,7 @@ const GroceryList = ({ setGroceryCount }) => {
                   id="recurring"
                   checked={formData.recurring}
                   onChange={(e) => setFormData({ ...formData, recurring: e.target.checked })}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
                 />
                 <label htmlFor="recurring" className="text-sm font-medium text-gray-700">
                   Recurring item
@@ -490,7 +557,7 @@ const GroceryList = ({ setGroceryCount }) => {
                   <select
                     value={formData.recurringFrequency}
                     onChange={(e) => setFormData({ ...formData, recurringFrequency: e.target.value })}
-                    className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     <option value="weekly">Weekly</option>
                     <option value="biweekly">Bi-weekly</option>
@@ -503,13 +570,13 @@ const GroceryList = ({ setGroceryCount }) => {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors"
                 >
                   {editingItem ? 'Save Changes' : 'Add Item'}
                 </button>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../contexts/SocketContext';
 import axiosInstance from '../utils/axios';
-
+import { Link } from 'react-router-dom';
 import { 
   format, 
   startOfMonth, 
@@ -18,7 +18,8 @@ import {
 } from 'date-fns';
 import { 
   FiPlus, FiChevronLeft, FiChevronRight, FiCalendar, FiX,
-  FiClock, FiMapPin, FiUsers, FiBell, FiRepeat
+  FiClock, FiMapPin, FiUsers, FiBell, FiRepeat,
+  FiArrowLeft, FiGrid, FiList, FiEdit2
 } from 'react-icons/fi';
 
 const Calendar = () => {
@@ -31,7 +32,7 @@ const Calendar = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [editingEvent, setEditingEvent] = useState(null);
   const [familyMembers, setFamilyMembers] = useState([]);
-  const [view, setView] = useState('month'); // month, week, list
+  const [view, setView] = useState('month');
   
   const [formData, setFormData] = useState({
     title: '',
@@ -41,7 +42,7 @@ const Calendar = () => {
     allDay: false,
     location: '',
     category: 'other',
-    color: '#3B82F6',
+    color: '#3b82f6',
     attendees: [],
     reminders: [{ type: 'notification', minutesBefore: 15 }],
     recurring: false,
@@ -54,15 +55,14 @@ const Calendar = () => {
   });
 
   const categories = [
-    { value: 'appointment', label: 'Appointment', color: '#EF4444' },
-    { value: 'birthday', label: 'Birthday', color: '#F59E0B' },
-    { value: 'holiday', label: 'Holiday', color: '#10B981' },
-    { value: 'school', label: 'School', color: '#8B5CF6' },
-    { value: 'work', label: 'Work', color: '#3B82F6' },
-    { value: 'social', label: 'Social', color: '#EC4899' },
-    { value: 'sports', label: 'Sports', color: '#06B6D4' },
-    { value: 'travel', label: 'Travel', color: '#F97316' },
-    { value: 'other', label: 'Other', color: '#6B7280' }
+    { value: 'appointment', label: 'Appointment', icon: '🏥', color: '#ef4444' },
+    { value: 'birthday', label: 'Birthday', icon: '🎂', color: '#f59e0b' },
+    { value: 'holiday', label: 'Holiday', icon: '🎉', color: '#10b981' },
+    { value: 'school', label: 'School', icon: '📚', color: '#8b5cf6' },
+    { value: 'work', label: 'Work', icon: '💼', color: '#3b82f6' },
+    { value: 'social', label: 'Social', icon: '🎭', color: '#ec4899' },
+    { value: 'sports', label: 'Sports', icon: '⚽', color: '#06b6d4' },
+    { value: 'other', label: 'Other', icon: '📅', color: '#6b7280' }
   ];
 
   useEffect(() => {
@@ -104,7 +104,7 @@ const Calendar = () => {
         }
       });
       
-      setEvents(response.data.events);
+      setEvents(response.data.events || []);
     } catch (error) {
       console.error('Failed to fetch events:', error);
     } finally {
@@ -148,6 +148,7 @@ const Calendar = () => {
   const handleRSVP = async (eventId, response) => {
     try {
       await axiosInstance.post(`/events/${eventId}/rsvp`, { response });
+      fetchEvents();
     } catch (error) {
       console.error('Failed to update RSVP:', error);
     }
@@ -162,7 +163,7 @@ const Calendar = () => {
       allDay: false,
       location: '',
       category: 'other',
-      color: '#3B82F6',
+      color: '#3b82f6',
       attendees: [],
       reminders: [{ type: 'notification', minutesBefore: 15 }],
       recurring: false,
@@ -191,6 +192,10 @@ const Calendar = () => {
     setShowAddModal(true);
   };
 
+  const getCategoryDetails = (category) => {
+    return categories.find(c => c.value === category) || categories[categories.length - 1];
+  };
+
   const renderMonthView = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
@@ -212,20 +217,24 @@ const Calendar = () => {
         days.push(
           <div
             key={day}
-            className={`min-h-24 p-2 border border-gray-200 ${
-              !isSameMonth(day, monthStart) ? 'bg-gray-50' : 'bg-white'
-            } ${isToday(day) ? 'bg-blue-50' : ''} hover:bg-gray-50 cursor-pointer`}
+            className={`min-h-24 p-2 border-r border-b border-gray-200 cursor-pointer transition-colors ${
+              !isSameMonth(day, monthStart) 
+                ? 'bg-gray-50 text-gray-400' 
+                : isToday(day) 
+                  ? 'bg-blue-50' 
+                  : 'bg-white hover:bg-gray-50'
+            }`}
             onClick={() => openAddModal(currentDay)}
           >
-            <div className={`text-sm font-medium ${
-              !isSameMonth(day, monthStart) ? 'text-gray-400' : 'text-gray-900'
-            } ${isToday(day) ? 'text-blue-600' : ''}`}>
+            <div className={`text-sm font-medium mb-1 ${
+              isToday(day) ? 'text-blue-600' : ''
+            }`}>
               {format(day, dateFormat)}
             </div>
             
-            <div className="mt-1 space-y-1">
-              {dayEvents.slice(0, 3).map((event, index) => {
-                const category = categories.find(c => c.value === event.category);
+            <div className="space-y-1">
+              {dayEvents.slice(0, 3).map((event) => {
+                const category = getCategoryDetails(event.category);
                 return (
                   <div
                     key={event._id}
@@ -233,15 +242,21 @@ const Calendar = () => {
                       e.stopPropagation();
                       setSelectedEvent(event);
                     }}
-                    className="text-xs p-1 rounded truncate cursor-pointer hover:opacity-80"
-                    style={{ backgroundColor: event.color + '20', color: event.color }}
+                    className="text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 transition-opacity"
+                    style={{ 
+                      backgroundColor: event.color + '15',
+                      color: event.color,
+                      borderLeft: `2px solid ${event.color}`
+                    }}
                   >
-                    {format(new Date(event.startDate), 'h:mm a')} - {event.title}
+                    <span className="font-medium">
+                      {format(new Date(event.startDate), 'HH:mm')} {event.title}
+                    </span>
                   </div>
                 );
               })}
               {dayEvents.length > 3 && (
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 text-center">
                   +{dayEvents.length - 3} more
                 </div>
               )}
@@ -258,7 +273,7 @@ const Calendar = () => {
       days = [];
     }
 
-    return <div>{rows}</div>;
+    return <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">{rows}</div>;
   };
 
   const renderListView = () => {
@@ -276,32 +291,34 @@ const Calendar = () => {
     }, {});
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         {Object.entries(eventsByDate).map(([date, dayEvents]) => (
           <div key={date}>
-            <h3 className="font-semibold text-gray-900 mb-2">
+            <h3 className="font-semibold text-gray-900 mb-3">
               {format(new Date(date), 'EEEE, MMMM d, yyyy')}
             </h3>
-            <div className="space-y-2">
-              {dayEvents.map(event => {
-                const category = categories.find(c => c.value === event.category);
+            <div className="space-y-3">
+              {dayEvents.map((event) => {
+                const category = getCategoryDetails(event.category);
                 return (
                   <div
                     key={event._id}
                     onClick={() => setSelectedEvent(event)}
-                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+                    className="bg-white rounded-lg border border-gray-200 p-4 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-3">
                         <div
-                          className="w-3 h-3 rounded-full mt-1.5"
-                          style={{ backgroundColor: event.color }}
-                        />
-                        <div>
+                          className="w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0"
+                          style={{ backgroundColor: event.color + '15' }}
+                        >
+                          {category.icon}
+                        </div>
+                        <div className="flex-1">
                           <h4 className="font-medium text-gray-900">{event.title}</h4>
-                          <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600">
+                          <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-gray-500">
                             <span className="flex items-center space-x-1">
-                              <FiClock className="w-4 h-4" />
+                              <FiClock className="w-3.5 h-3.5" />
                               <span>
                                 {format(new Date(event.startDate), 'h:mm a')} - 
                                 {format(new Date(event.endDate), 'h:mm a')}
@@ -309,21 +326,27 @@ const Calendar = () => {
                             </span>
                             {event.location && (
                               <span className="flex items-center space-x-1">
-                                <FiMapPin className="w-4 h-4" />
+                                <FiMapPin className="w-3.5 h-3.5" />
                                 <span>{event.location}</span>
                               </span>
                             )}
                             {event.attendees.length > 0 && (
                               <span className="flex items-center space-x-1">
-                                <FiUsers className="w-4 h-4" />
+                                <FiUsers className="w-3.5 h-3.5" />
                                 <span>{event.attendees.length}</span>
                               </span>
                             )}
                           </div>
                         </div>
                       </div>
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
-                        {category?.label}
+                      <span 
+                        className="text-xs px-3 py-1 rounded-full font-medium"
+                        style={{ 
+                          backgroundColor: event.color + '15',
+                          color: event.color
+                        }}
+                      >
+                        {category.label}
                       </span>
                     </div>
                   </div>
@@ -338,8 +361,11 @@ const Calendar = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading calendar...</p>
+        </div>
       </div>
     );
   }
@@ -347,95 +373,121 @@ const Calendar = () => {
   const currentUserId = localStorage.getItem('userId');
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-2xl font-bold text-gray-900">Family Calendar</h2>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <FiChevronLeft className="w-5 h-5" />
-            </button>
-            <h3 className="text-lg font-semibold text-gray-900 min-w-[150px] text-center">
-              {format(currentMonth, 'MMMM yyyy')}
-            </h3>
-            <button
-              onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <FiChevronRight className="w-5 h-5" />
-            </button>
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <Link to="/dashboard">
+                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
+                  <FiArrowLeft className="w-5 h-5" />
+                </button>
+              </Link>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Family Calendar</h1>
+                <p className="text-sm text-gray-500">Keep track of important events</p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setView('month')}
+                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                    view === 'month' 
+                      ? 'bg-white text-gray-900 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <FiGrid className="w-4 h-4 inline-block mr-1" />
+                  Month
+                </button>
+                <button
+                  onClick={() => setView('list')}
+                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                    view === 'list' 
+                      ? 'bg-white text-gray-900 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <FiList className="w-4 h-4 inline-block mr-1" />
+                  List
+                </button>
+              </div>
+
+              <button
+                onClick={() => openAddModal()}
+                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              >
+                <FiPlus className="w-4 h-4" />
+                <span>Add Event</span>
+              </button>
+            </div>
           </div>
         </div>
+      </header>
 
-        <div className="flex items-center space-x-3">
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setView('month')}
-              className={`px-3 py-1 rounded ${
-                view === 'month' ? 'bg-white shadow-sm' : ''
-              }`}
-            >
-              Month
-            </button>
-            <button
-              onClick={() => setView('list')}
-              className={`px-3 py-1 rounded ${
-                view === 'list' ? 'bg-white shadow-sm' : ''
-              }`}
-            >
-              List
-            </button>
-          </div>
-
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Month Navigation */}
+        <div className="bg-white rounded-xl p-4 mb-6 border border-gray-100 flex items-center justify-between">
           <button
-            onClick={() => openAddModal()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <FiPlus className="w-5 h-5" />
-            <span>Add Event</span>
+            <FiChevronLeft className="w-5 h-5" />
+          </button>
+          <h2 className="text-xl font-semibold text-gray-900">
+            {format(currentMonth, 'MMMM yyyy')}
+          </h2>
+          <button
+            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <FiChevronRight className="w-5 h-5" />
           </button>
         </div>
-      </div>
 
-      {/* Calendar/List View */}
-      {view === 'month' ? (
-        <>
-          {/* Days of Week */}
-          <div className="grid grid-cols-7 mb-2">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} className="text-center text-sm font-semibold text-gray-700 py-2">
-                {day}
-              </div>
-            ))}
+        {/* Calendar/List View */}
+        {view === 'month' ? (
+          <>
+            {/* Days of Week */}
+            <div className="grid grid-cols-7 bg-white rounded-t-xl border border-b-0 border-gray-200">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <div key={day} className="text-center text-sm font-medium text-gray-700 py-3 border-r last:border-r-0 border-gray-200">
+                  {day}
+                </div>
+              ))}
+            </div>
+            {renderMonthView()}
+          </>
+        ) : (
+          <div className="bg-white rounded-xl p-6 border border-gray-100">
+            {renderListView()}
           </div>
-          {renderMonthView()}
-        </>
-      ) : (
-        renderListView()
-      )}
+        )}
+      </main>
 
       {/* Add/Edit Event Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              {editingEvent ? 'Edit Event' : 'Add Event'}
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">
+              {editingEvent ? 'Edit Event' : 'Create New Event'}
             </h3>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title *
+                  Event Title
                 </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., Family Dinner, Soccer Practice..."
                   required
                 />
               </div>
@@ -448,11 +500,12 @@ const Calendar = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows="3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  placeholder="Add event details..."
                 />
               </div>
 
-              <div className="flex items-center space-x-3 mb-4">
+              <div className="flex items-center space-x-3">
                 <input
                   type="checkbox"
                   id="allDay"
@@ -468,26 +521,26 @@ const Calendar = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Date & Time *
+                    Start Date & Time
                   </label>
                   <input
                     type={formData.allDay ? "date" : "datetime-local"}
                     value={formData.startDate}
                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End Date & Time *
+                    End Date & Time
                   </label>
                   <input
                     type={formData.allDay ? "date" : "datetime-local"}
                     value={formData.endDate}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                 </div>
@@ -502,7 +555,7 @@ const Calendar = () => {
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="Add location"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
@@ -521,11 +574,11 @@ const Calendar = () => {
                         color: category?.color || '#3B82F6'
                       });
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     {categories.map(category => (
                       <option key={category.value} value={category.value}>
-                        {category.label}
+                        {category.icon} {category.label}
                       </option>
                     ))}
                   </select>
@@ -548,9 +601,9 @@ const Calendar = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Invite Family Members
                 </label>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
+                <div className="border border-gray-300 rounded-lg p-3 max-h-32 overflow-y-auto">
                   {familyMembers.map(member => (
-                    <label key={member._id} className="flex items-center space-x-2">
+                    <label key={member._id} className="flex items-center space-x-2 py-1 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={formData.attendees.includes(member._id)}
@@ -569,7 +622,7 @@ const Calendar = () => {
                         }}
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
-                      <span className="text-sm">{member.fullName}</span>
+                      <span className="text-sm text-gray-700">{member.fullName}</span>
                     </label>
                   ))}
                 </div>
@@ -592,15 +645,15 @@ const Calendar = () => {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
                 >
-                  {editingEvent ? 'Save Changes' : 'Add Event'}
+                  {editingEvent ? 'Save Changes' : 'Create Event'}
                 </button>
               </div>
             </form>
@@ -610,44 +663,44 @@ const Calendar = () => {
 
       {/* Event Details Modal */}
       {selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start space-x-3">
                 <div
-                  className="w-4 h-4 rounded-full mt-1"
-                  style={{ backgroundColor: selectedEvent.color }}
-                />
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
+                  style={{ backgroundColor: selectedEvent.color + '15' }}
+                >
+                  {getCategoryDetails(selectedEvent.category).icon}
+                </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">{selectedEvent.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {categories.find(c => c.value === selectedEvent.category)?.label}
+                  <h3 className="text-lg font-semibold text-gray-900">{selectedEvent.title}</h3>
+                  <p className="text-sm text-gray-500">
+                    {getCategoryDetails(selectedEvent.category).label}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedEvent(null)}
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className="p-1 text-gray-400 hover:text-gray-600"
               >
                 <FiX className="w-5 h-5" />
               </button>
             </div>
 
             {selectedEvent.description && (
-              <p className="text-gray-700 mb-4">{selectedEvent.description}</p>
+              <p className="text-gray-600 mb-4">{selectedEvent.description}</p>
             )}
 
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-6 text-sm">
               <div className="flex items-center space-x-3 text-gray-600">
-                <FiCalendar className="w-5 h-5" />
-                <span>
-                  {format(new Date(selectedEvent.startDate), 'EEEE, MMMM d, yyyy')}
-                </span>
+                <FiCalendar className="w-4 h-4 flex-shrink-0" />
+                <span>{format(new Date(selectedEvent.startDate), 'EEEE, MMMM d, yyyy')}</span>
               </div>
 
               {!selectedEvent.allDay && (
                 <div className="flex items-center space-x-3 text-gray-600">
-                  <FiClock className="w-5 h-5" />
+                  <FiClock className="w-4 h-4 flex-shrink-0" />
                   <span>
                     {format(new Date(selectedEvent.startDate), 'h:mm a')} - 
                     {format(new Date(selectedEvent.endDate), 'h:mm a')}
@@ -657,14 +710,14 @@ const Calendar = () => {
 
               {selectedEvent.location && (
                 <div className="flex items-center space-x-3 text-gray-600">
-                  <FiMapPin className="w-5 h-5" />
+                  <FiMapPin className="w-4 h-4 flex-shrink-0" />
                   <span>{selectedEvent.location}</span>
                 </div>
               )}
 
               {selectedEvent.recurring && (
                 <div className="flex items-center space-x-3 text-blue-600">
-                  <FiRepeat className="w-5 h-5" />
+                  <FiRepeat className="w-4 h-4 flex-shrink-0" />
                   <span className="capitalize">
                     Repeats {selectedEvent.recurringPattern.frequency}
                   </span>
@@ -674,23 +727,23 @@ const Calendar = () => {
 
             {selectedEvent.attendees.length > 0 && (
               <div className="mb-6">
-                <h4 className="font-semibold text-gray-900 mb-2">Attendees</h4>
+                <h4 className="font-medium text-gray-900 mb-3">Attendees</h4>
                 <div className="space-y-2">
                   {selectedEvent.attendees.map(attendee => {
                     const isCurrentUser = attendee.user._id === currentUserId;
                     return (
                       <div key={attendee.user._id} className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-xs font-medium text-indigo-600">
                             {attendee.user.fullName[0].toUpperCase()}
                           </div>
-                          <span className="text-sm">{attendee.user.fullName}</span>
+                          <span className="text-sm text-gray-700">{attendee.user.fullName}</span>
                         </div>
                         {isCurrentUser ? (
                           <select
                             value={attendee.response}
                             onChange={(e) => handleRSVP(selectedEvent._id, e.target.value)}
-                            className="text-sm px-2 py-1 border border-gray-300 rounded focus:outline-none"
+                            className="text-sm px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             <option value="pending">No response</option>
                             <option value="accepted">Going</option>
@@ -717,11 +770,11 @@ const Calendar = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-between text-sm text-gray-600">
+            <div className="flex items-center justify-between text-sm text-gray-500">
               <span>Created by {selectedEvent.createdBy.fullName}</span>
               <button
                 onClick={() => setSelectedEvent(null)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
               >
                 Close
               </button>

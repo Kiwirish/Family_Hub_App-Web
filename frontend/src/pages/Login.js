@@ -1,8 +1,11 @@
-
-// frontend/src/pages/Login.js - Enhanced Login
+// frontend/src/pages/Login.js 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axios';
+import { 
+  FiArrowLeft, FiMail, FiLock, FiLogIn,
+  FiEye, FiEyeOff, FiUser, FiUsers
+} from 'react-icons/fi';
 
 const Login = ({setIsAuthenticated}) => {
   const navigate = useNavigate();
@@ -13,6 +16,7 @@ const Login = ({setIsAuthenticated}) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,11 +32,12 @@ const Login = ({setIsAuthenticated}) => {
         if (response.data.family.joinCode) {
           localStorage.setItem('joinCode', response.data.family.joinCode);
         }
+        localStorage.setItem('userId', response.data.user._id);
         setIsAuthenticated(true);
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
@@ -46,47 +51,50 @@ const Login = ({setIsAuthenticated}) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <Link to="/" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-8 group">
-          <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Home
+          <FiArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-sm font-medium">Back to Home</span>
         </Link>
         
-        <div className="bg-white rounded-3xl shadow-2xl p-10">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-2xl mb-4">
-              <span className="text-2xl">👋</span>
+            <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <FiUser className="w-8 h-8 text-indigo-600" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome Back!
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Welcome Back
             </h2>
             <p className="text-gray-600">Sign in to your family hub</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Email Address
               </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="your@email.com"
-                required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all"
-              />
+              <div className="relative">
+                <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="your@email.com"
+                  required
+                  className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  autoFocus
+                />
+              </div>
             </div>
             
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Password
               </label>
               <div className="relative">
+                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
@@ -94,23 +102,36 @@ const Login = ({setIsAuthenticated}) => {
                   onChange={handleChange}
                   placeholder="••••••••"
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all pr-12"
+                  className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
+
+            <div className="flex items-center justify-between">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                />
+                <span className="ml-2 text-sm text-gray-600">Remember me</span>
+              </label>
+              
+              <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                Forgot password?
+              </Link>
+            </div>
             
             {error && (
-              <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
@@ -118,7 +139,7 @@ const Login = ({setIsAuthenticated}) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl font-semibold transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -128,23 +149,43 @@ const Login = ({setIsAuthenticated}) => {
                   </svg>
                   Signing in...
                 </span>
-              ) : 'Sign In'}
+              ) : (
+                <span className="flex items-center justify-center">
+                  <span>Sign In</span>
+                  <FiLogIn className="w-4 h-4 ml-2" />
+                </span>
+              )}
             </button>
           </form>
           
-          <div className="mt-8 pt-6 border-t border-gray-200">
+          <div className="mt-8 pt-8 border-t border-gray-200">
             <p className="text-center text-sm text-gray-600 mb-4">
               New to Family Hub?
             </p>
-            <div className="grid grid-cols-2 gap-4">
-              <Link to="/create-family" className="text-center py-2 px-4 border-2 border-blue-600 text-blue-600 rounded-xl hover:bg-blue-50 transition-colors font-semibold">
-                Create Family
+            <div className="grid grid-cols-2 gap-3">
+              <Link to="/create-family" className="block">
+                <button className="w-full py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors flex items-center justify-center space-x-2 text-sm">
+                  <FiUsers className="w-4 h-4" />
+                  <span>Create Family</span>
+                </button>
               </Link>
-              <Link to="/join-family" className="text-center py-2 px-4 border-2 border-green-600 text-green-600 rounded-xl hover:bg-green-50 transition-colors font-semibold">
-                Join Family
+              <Link to="/join-family" className="block">
+                <button className="w-full py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors flex items-center justify-center space-x-2 text-sm">
+                  <FiUser className="w-4 h-4" />
+                  <span>Join Family</span>
+                </button>
               </Link>
             </div>
           </div>
+        </div>
+        
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-500">
+            By signing in, you agree to our{' '}
+            <a href="#" className="text-indigo-600 hover:text-indigo-700">Terms</a>
+            {' '}and{' '}
+            <a href="#" className="text-indigo-600 hover:text-indigo-700">Privacy Policy</a>
+          </p>
         </div>
       </div>
     </div>

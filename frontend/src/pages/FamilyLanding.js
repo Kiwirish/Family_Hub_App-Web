@@ -2,92 +2,196 @@
 // frontend/src/pages/FamilyLanding.js - Enhanced Landing Page
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { 
+  FiHome, FiUsers, FiCamera, FiShoppingCart, FiMessageCircle, 
+  FiCalendar, FiShield, FiClock, FiSmartphone, FiCheck
+} from 'react-icons/fi';
 
 const FamilyLanding = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-      </div>
+  const features = [
+    { icon: <FiCamera />, title: 'Photo Sharing', desc: 'Capture and share precious moments' },
+    { icon: <FiShoppingCart />, title: 'Shopping Lists', desc: 'Collaborate on family needs' },
+    { icon: <FiMessageCircle />, title: 'Family Chat', desc: 'Stay connected instantly' },
+    { icon: <FiCalendar />, title: 'Shared Calendar', desc: 'Never miss important events' }
+  ];
 
-      {/* Content */}
-      <div className="relative container mx-auto px-6 py-16">
-        <div className="text-center max-w-4xl mx-auto">
-          {/* Logo/Brand */}
-          <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-lg mb-4">
-              <span className="text-4xl">🏠</span>
+  const benefits = [
+    { icon: <FiShield />, title: 'Private & Secure', desc: 'Your data is encrypted' },
+    { icon: <FiClock />, title: 'Real-time Sync', desc: 'Updates for everyone' },
+    { icon: <FiSmartphone />, title: 'Works Everywhere', desc: 'Access on any device' }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
+                <FiHome className="text-white text-xl" />
+              </div>
+              <span className="text-xl font-bold text-gray-900">Family Hub</span>
             </div>
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
-              Family Hub
-            </h1>
-            <p className="text-2xl text-gray-700 font-light mb-12 max-w-2xl mx-auto">
-              Your private digital space to connect, share memories, and stay organized with the people who matter most
-            </p>
+            <Link to="/login">
+              <button className="text-gray-600 hover:text-gray-900 font-medium text-sm">
+                Sign In
+              </button>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+            Your Family's Digital Home
+          </h1>
+          <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+            Connect, share, and stay organized with the people who matter most. 
+            Create your private family space in seconds.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <Link to="/create-family">
+              <button className="px-8 py-4 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors">
+                Start Your Family Hub
+              </button>
+            </Link>
+            <Link to="/join-family">
+              <button className="px-8 py-4 bg-white text-gray-700 font-medium rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors">
+                Join with Code
+              </button>
+            </Link>
           </div>
 
-          {/* Feature Pills */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            {['📸 Photo Sharing', '📝 Shopping Lists', '💬 Family Chat', '📅 Shared Calendar'].map((feature, index) => (
-              <div key={index} className="px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-md text-gray-700 font-medium">
-                {feature}
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+            <span className="flex items-center space-x-2">
+              <FiCheck className="text-green-500" />
+              <span>Free to use</span>
+            </span>
+            <span className="flex items-center space-x-2">
+              <FiCheck className="text-green-500" />
+              <span>No credit card required</span>
+            </span>
+            <span className="flex items-center space-x-2">
+              <FiCheck className="text-green-500" />
+              <span>Set up in 60 seconds</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-white border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            Everything your family needs
+          </h2>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center">
+                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600">
+                  <span className="text-2xl">{feature.icon}</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.desc}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Action Cards */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-            <Link to="/create-family" className="group">
-              <div className="bg-white rounded-3xl shadow-xl p-10 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
+      {/* Benefits Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                Built for modern families
+              </h2>
+              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                Whether you're managing a busy household or staying connected across distances, 
+                Family Hub gives you the tools to bring everyone together.
+              </p>
+              
+              <div className="space-y-4">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-start space-x-4">
+                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 text-gray-600">
+                      {benefit.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{benefit.title}</h4>
+                      <p className="text-gray-600">{benefit.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-8 border border-gray-200">
+              <div className="space-y-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">👨‍👩‍👧‍👦</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">10,000+ Families</p>
+                    <p className="text-sm text-gray-600">Trust Family Hub daily</p>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Start a New Family Hub</h3>
-                <p className="text-gray-600 mb-6">Create your family's private space and invite your loved ones to join</p>
-                <div className="inline-flex items-center text-blue-600 font-semibold group-hover:text-blue-700">
-                  Create Family
-                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
+                
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">📸</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">1M+ Memories</p>
+                    <p className="text-sm text-gray-600">Shared and cherished</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">🎯</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">99.9% Uptime</p>
+                    <p className="text-sm text-gray-600">Always there for you</p>
+                  </div>
                 </div>
               </div>
-            </Link>
-
-            <Link to="/join-family" className="group">
-              <div className="bg-white rounded-3xl shadow-xl p-10 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Join Your Family</h3>
-                <p className="text-gray-600 mb-6">Have a family code? Enter it to join your family's hub</p>
-                <div className="inline-flex items-center text-green-600 font-semibold group-hover:text-green-700">
-                  Join Family
-                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </div>
-              </div>
-            </Link>
-          </div>
-
-          {/* Login Link */}
-          <div className="mt-12">
-            <p className="text-gray-600">
-              Already part of a family hub?
-              <Link to="/login" className="ml-2 text-blue-600 hover:text-blue-700 font-semibold hover:underline">
-                Sign in here
-              </Link>
-            </p>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-indigo-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Ready to bring your family together?
+          </h2>
+          <p className="text-xl text-indigo-100 mb-8">
+            Join thousands of families already using Family Hub
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/create-family">
+              <button className="px-8 py-4 bg-white text-indigo-600 font-medium rounded-xl hover:bg-gray-100 transition-colors">
+                Get Started Free
+              </button>
+            </Link>
+            <Link to="/join-family">
+              <button className="px-8 py-4 bg-indigo-700 text-white font-medium rounded-xl hover:bg-indigo-800 transition-colors">
+                I Have a Code
+              </button>
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
