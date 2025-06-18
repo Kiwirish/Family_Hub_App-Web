@@ -2,7 +2,7 @@
 // frontend/src/utils/axios.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5050/api';
+const API_BASE_URL = 'https://family-hub-app-web.onrender.com/api';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,

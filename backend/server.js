@@ -17,14 +17,14 @@ const server = http.createServer(app);
 //Socket.io setup with CORS
 const io = socketIO(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'https://family-hub-app-c29gy8a5g-kiwirishs-projects.vercel.app/',
     methods: ['GET', 'POST'],
     credentials: true
   }
 });
 
 const corsOptions = {
-  origin: 'http://localhost:3000',  // Allow frontend origin
+  origin: 'https://family-hub-app-c29gy8a5g-kiwirishs-projects.vercel.app/',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true, // Optional, only needed if you're using cookies or sessions
