@@ -15,6 +15,7 @@ import './App.css';
 import { SocketProvider } from './contexts/SocketContext';
 import GroceryList from './components/GroceryList';
 import Calendar from './components/Calendar';
+import Lists from './components/Lists';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -42,33 +43,43 @@ function App() {
   return (
     <Router>
       <SocketProvider>
-      <Routes>
-        <Route path="/" element={!isAuthenticated ? <FamilyLanding /> : <Navigate to="/dashboard" />} />
-        <Route path="/create-family" element={!isAuthenticated ? <CreateFamily setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
-        <Route path="/join-family" element={!isAuthenticated ? <JoinFamily setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
-        <Route path="/login" element={!isAuthenticated ? <Login setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
-        <Route path="/dashboard" element={isAuthenticated ? <Dashboard setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/" />} />
-        <Route 
-            path="/grocery" 
+        <Routes>
+          <Route path="/" element={!isAuthenticated ? <FamilyLanding /> : <Navigate to="/dashboard" />} />
+          <Route path="/create-family" element={!isAuthenticated ? <CreateFamily setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
+          <Route path="/join-family" element={!isAuthenticated ? <JoinFamily setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
+          <Route path="/login" element={!isAuthenticated ? <Login setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
+          <Route path="/dashboard" element={isAuthenticated ? <Dashboard setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/" />} />
+          <Route
+            path="/grocery"
             element={
               isAuthenticated ? (
                 <GroceryList setIsAuthenticated={setIsAuthenticated} />
               ) : (
                 <Navigate to="/" />
               )
-            } 
+            }
           />
-          <Route 
-            path="/calendar" 
+          <Route
+            path="/calendar"
             element={
               isAuthenticated ? (
                 <Calendar setIsAuthenticated={setIsAuthenticated} />
               ) : (
                 <Navigate to="/" />
               )
-            } 
+            }
           />
-      </Routes>
+          <Route
+            path="/lists"
+            element={
+              isAuthenticated ? (
+                <Lists />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+        </Routes>
       </SocketProvider>
     </Router>
   );

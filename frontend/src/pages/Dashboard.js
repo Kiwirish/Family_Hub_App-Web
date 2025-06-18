@@ -1,3 +1,4 @@
+// frontend/src/pages/Dashboard.js - Elegant Minimal Dashboard
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axios';
@@ -5,9 +6,9 @@ import { Link } from 'react-router-dom';
 import { 
   FiHome, FiUsers, FiCamera, FiShoppingCart, FiMessageCircle, 
   FiCalendar, FiCoffee, FiCheckCircle, FiPlus, FiLogOut,
-  FiSettings, FiBell, FiActivity, FiClock
+  FiSettings, FiBell, FiActivity, FiClock, FiList
 } from 'react-icons/fi';
-//
+
 const Dashboard = ({setIsAuthenticated}) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -251,18 +252,20 @@ const Dashboard = ({setIsAuthenticated}) => {
               comingSoon={false}
             />
           </Link>
+          <Link to="/lists" className="block">
+            <FeatureCard
+              title="Lists"
+              description="Create custom lists for anything"
+              icon={<FiList />}
+              accentColor="orange"
+              comingSoon={false}
+            />
+          </Link>
           <FeatureCard
             title="Meal Planner"
             description="Plan weekly meals together"
             icon={<FiCoffee />}
             accentColor="rose"
-            comingSoon={true}
-          />
-          <FeatureCard
-            title="Chore Tracker"
-            description="Manage household tasks fairly"
-            icon={<FiCheckCircle />}
-            accentColor="cyan"
             comingSoon={true}
           />
         </div>
@@ -301,6 +304,7 @@ const FeatureCard = ({ title, description, icon, accentColor, comingSoon }) => {
     emerald: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100',
     amber: 'bg-amber-50 text-amber-600 group-hover:bg-amber-100',
     blue: 'bg-blue-50 text-blue-600 group-hover:bg-blue-100',
+    orange: 'bg-orange-50 text-orange-600 group-hover:bg-orange-100',
     rose: 'bg-rose-50 text-rose-600 group-hover:bg-rose-100',
     cyan: 'bg-cyan-50 text-cyan-600 group-hover:bg-cyan-100'
   };
