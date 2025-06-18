@@ -44,7 +44,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // Import models
 const Family = require('./models/family');
 const User = require('./models/user');
-const GroceryItem = require('./models/GroceryItem');  // Add this
+const GroceryItem = require('./models/groceryItem');  // Add this
 const Event = require('./models/event');
 const List = require('./models/List');
 
