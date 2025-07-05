@@ -2,17 +2,29 @@
 // frontend/src/pages/FamilyLanding.js - Enhanced Landing Page
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FiHome, FiUsers, FiCamera, FiShoppingCart, FiMessageCircle, 
+import {
+  FiHome, FiUsers, FiCamera, FiShoppingCart, FiMessageCircle,
   FiCalendar, FiShield, FiClock, FiSmartphone, FiCheck
 } from 'react-icons/fi';
 
 const FamilyLanding = () => {
   const features = [
-    { icon: <FiCamera />, title: 'Photo Sharing', desc: 'Capture and share precious moments' },
-    { icon: <FiShoppingCart />, title: 'Shopping Lists', desc: 'Collaborate on family needs' },
-    { icon: <FiMessageCircle />, title: 'Family Chat', desc: 'Stay connected instantly' },
-    { icon: <FiCalendar />, title: 'Shared Calendar', desc: 'Never miss important events' }
+    {
+      icon: <FiCamera />, title: 'Photo Sharing', desc: 'Capture and share precious moments',
+      comingSoon: true
+    },
+    {
+      icon: <FiShoppingCart />, title: 'Shopping Lists', desc: 'Collaborate on family needs',
+      comingSoon: false
+    },
+    {
+      icon: <FiMessageCircle />, title: 'Family Chat', desc: 'Stay connected instantly',
+      comingSoon: true
+    },
+    {
+      icon: <FiCalendar />, title: 'Shared Calendar', desc: 'Never miss important events',
+      comingSoon: false
+    }
   ];
 
   const benefits = [
@@ -49,10 +61,10 @@ const FamilyLanding = () => {
             Your Family's Digital Home
           </h1>
           <p className="text-xl text-gray-600 mb-10 leading-relaxed">
-            Connect, share, and stay organized with the people who matter most. 
+            Connect, share, and stay organised with the people who matter most.
             Create your private family space in seconds.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link to="/create-family">
               <button className="px-8 py-4 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors">
@@ -89,15 +101,31 @@ const FamilyLanding = () => {
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
             Everything your family needs
           </h2>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600">
-                  <span className="text-2xl">{feature.icon}</span>
+              <div key={index} className="text-center relative">
+                {/* Coming Soon Badge */}
+                {feature.comingSoon && (
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
+                    <span className="bg-amber-100 text-amber-800 text-xs font-medium px-3 py-1 rounded-full border border-amber-200">
+                      Coming Soon
+                    </span>
+                  </div>
+                )}
+
+                {/* Feature Card */}
+                <div className={`${feature.comingSoon ? 'opacity-75' : ''}`}>
+                  <div className={`w-16 h-16 ${feature.comingSoon ? 'bg-gray-100' : 'bg-indigo-50'} rounded-2xl flex items-center justify-center mx-auto mb-4 ${feature.comingSoon ? 'text-gray-400' : 'text-indigo-600'}`}>
+                    <span className="text-2xl">{feature.icon}</span>
+                  </div>
+                  <h3 className={`text-lg font-semibold ${feature.comingSoon ? 'text-gray-500' : 'text-gray-900'} mb-2`}>
+                    {feature.title}
+                  </h3>
+                  <p className={`${feature.comingSoon ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {feature.desc}
+                  </p>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -113,10 +141,10 @@ const FamilyLanding = () => {
                 Built for modern families
               </h2>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                Whether you're managing a busy household or staying connected across distances, 
+                Whether you're managing a busy household or staying connected across distances,
                 Family Hub gives you the tools to bring everyone together.
               </p>
-              
+
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-4">
@@ -131,7 +159,7 @@ const FamilyLanding = () => {
                 ))}
               </div>
             </div>
-            
+
             <div className="bg-white rounded-2xl p-8 border border-gray-200">
               <div className="space-y-6">
                 <div className="flex items-center space-x-4">
@@ -139,21 +167,21 @@ const FamilyLanding = () => {
                     <span className="text-2xl">👨‍👩‍👧‍👦</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">10,000+ Families</p>
+                    <p className="font-semibold text-gray-900">Immediate & Extended Families</p>
                     <p className="text-sm text-gray-600">Trust Family Hub daily</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
                     <span className="text-2xl">📸</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">1M+ Memories</p>
+                    <p className="font-semibold text-gray-900">Infinite Memories</p>
                     <p className="text-sm text-gray-600">Shared and cherished</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                     <span className="text-2xl">🎯</span>
@@ -176,7 +204,7 @@ const FamilyLanding = () => {
             Ready to bring your family together?
           </h2>
           <p className="text-xl text-indigo-100 mb-8">
-            Join thousands of families already using Family Hub
+            Join families already using & getting closer with Family Hub
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/create-family">
