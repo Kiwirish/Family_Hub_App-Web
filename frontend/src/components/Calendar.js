@@ -1,4 +1,3 @@
-// frontend/src/components/Calendar.js
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../contexts/SocketContext';
 import axiosInstance from '../utils/axios';

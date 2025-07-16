@@ -1,7 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
 
-// frontend/src/App.js - Main App Component with Router
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import FamilyLanding from './pages/FamilyLanding';

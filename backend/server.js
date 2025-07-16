@@ -1,4 +1,3 @@
-// backend/server.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -10,7 +9,6 @@ const jwt = require('jsonwebtoken');
 const http = require('http');
 const socketIO = require('socket.io');
 
-// After creating the express app
 const app = express();
 const server = http.createServer(app);
 
@@ -30,7 +28,7 @@ const corsOptions = {
   '*'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true, // Optional, only needed if you're using cookies or sessions
+  credentials: true, 
 };
 
 app.use(cors(corsOptions));
@@ -47,7 +45,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // Import models
 const Family = require('./models/family');
 const User = require('./models/user');
-const GroceryItem = require('./models/groceryItem');  // Add this
+const GroceryItem = require('./models/groceryItem');  
 const Event = require('./models/event');
 const List = require('./models/List');
 
@@ -69,7 +67,7 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
-// Socket.io authentication middleware (add after your JWT middleware)
+// Socket.io authentication middleware 
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
   if (!token) {

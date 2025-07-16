@@ -1,4 +1,3 @@
-// frontend/src/components/Lists.js - Elegant Minimal Lists
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../contexts/SocketContext';
 import axiosInstance from '../utils/axios';

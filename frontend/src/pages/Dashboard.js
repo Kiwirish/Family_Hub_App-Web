@@ -1,4 +1,3 @@
-// frontend/src/pages/Dashboard.js - Elegant Minimal Dashboard
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axios';

@@ -1,5 +1,4 @@
 
-// frontend/src/components/LoadingScreen.js
 import React from 'react';
 
 const LoadingScreen = () => (

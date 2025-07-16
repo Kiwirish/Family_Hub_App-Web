@@ -1,5 +1,3 @@
-
-// frontend/src/pages/FamilyLanding.js - Enhanced Landing Page
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {

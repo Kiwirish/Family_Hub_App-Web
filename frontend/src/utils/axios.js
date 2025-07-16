@@ -1,5 +1,3 @@
-
-// frontend/src/utils/axios.js
 import axios from 'axios';
 
 const API_BASE_URL = 'https://family-hub-app-web.onrender.com/api';

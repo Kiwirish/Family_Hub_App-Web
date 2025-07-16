@@ -1,4 +1,3 @@
-// frontend/src/pages/JoinFamily.js 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axios';
