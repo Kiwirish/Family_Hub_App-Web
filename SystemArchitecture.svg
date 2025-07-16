@@ -252,9 +252,9 @@
   
   <!-- Data Flow Labels -->
   <g id="flow-labels">
-    <text x="320" y="300" font-size="10" fill="#666" transform="rotate(-90 320 300)">REST API</text>
-    <text x="670" y="300" font-size="10" fill="#666" transform="rotate(-90 670 300)">WebSocket</text>
-    <text x="910" y="300" font-size="10" fill="#666" transform="rotate(-90 910 300)">Styles</text>
-    <text x="1190" y="300" font-size="10" fill="#666" transform="rotate(-90 1190 300)">Auth</text>
+    <text x="320" y="300" font-size="10" fill="#666" >REST API</text>
+    <text x="670" y="300" font-size="10" fill="#666" >WebSocket</text>
+    <text x="910" y="300" font-size="10" fill="#666" >Styles</text>
+    <text x="1190" y="300" font-size="10" fill="#666" >Auth</text>
   </g>
 </svg>
