@@ -19,7 +19,7 @@ export const SocketProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     
     if (token) {
-      const newSocket = io('http://localhost:5050', {
+      const newSocket = io('https://family-hub-app-web.onrender.com', {
         auth: {
           token
         }

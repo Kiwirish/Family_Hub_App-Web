@@ -51,13 +51,14 @@ const List = require('./models/List');
 
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
+  // extract token from auth header
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ error: true, message: 'Access token required' });
   }
-
+  // verify JWT signature & attach user + family info to req object
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).json({ error: true, message: 'Invalid token' });

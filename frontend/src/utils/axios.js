@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
   },
 });
 
-// Add request interceptor to include auth token
+// request interceptor to include auth token
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -23,7 +23,7 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Add response interceptor to handle auth errors
+// response interceptor to handle auth errors
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
