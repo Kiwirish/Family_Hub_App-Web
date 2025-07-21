@@ -9,7 +9,9 @@ import {
 } from 'react-icons/fi';
 
 const GroceryList = ({ setGroceryCount }) => {
+  // custom hook
   const { socket } = useSocket();
+  // react hooks
   const [items, setItems] = useState([]);
   const [completedItems, setCompletedItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +46,7 @@ const GroceryList = ({ setGroceryCount }) => {
   const units = [
     'piece', 'kg', 'g', 'l', 'ml', 'dozen', 'pack', 'bottle', 'can', 'box', 'bag'
   ];
-
+  // on component mount
   useEffect(() => {
     fetchItems();
     fetchFamilyMembers();

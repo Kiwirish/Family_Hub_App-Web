@@ -8,11 +8,12 @@ const jwt = require('jsonwebtoken');
 
 const http = require('http');
 const socketIO = require('socket.io');
-
+// Express server & socketIO server on the same HTTP server instance
+// data shared across both the express http req/res and websocket, same data access
 const app = express();
 const server = http.createServer(app);
 
-//Socket.io setup with CORS
+//Socket.io setup with CORS - cross origin resource sharing
 const io = socketIO(server, {
   cors: {
     origin: '*', // Allow all origins for mobile apps
@@ -20,12 +21,12 @@ const io = socketIO(server, {
     credentials: true
   }
 });
-
+// allow communication from origins:
 const corsOptions = {
-  origin: ['https://family-hub-app-web.vercel.app',
+  origin: ['https://family-hub-app-web.vercel.app', // For deployed frontend 
   'http://localhost:3000', // For local web development
   'http://localhost:8081', // For React Native Metro bundler
-  '*'],
+  '*'], // temporary all to test diff mobile servers
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true, 
@@ -64,11 +65,13 @@ const authenticateToken = (req, res, next) => {
       return res.status(403).json({ error: true, message: 'Invalid token' });
     }
     req.user = decoded.user;
+    // every authenticated request extracts the familyId to scope to correct family
     req.familyId = decoded.familyId;
     next();
   });
 };
 // Socket.io authentication middleware 
+// socketIo connection authenticated w same token as HTTP API requests, just as secure
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
   if (!token) {
@@ -360,6 +363,7 @@ app.post('/api/login', async (req, res) => {
           email: user.email,
           role: user.role
         },
+        // familyId attached to every request, correct family scope always
         familyId: user.familyId._id
       },
       process.env.JWT_SECRET,
@@ -461,6 +465,7 @@ app.get('/api/family/members', authenticateToken, async (req, res) => {
 });
 
 // Get grocery items
+// Every query includes familyId through authenicateToken
 app.get('/api/grocery', authenticateToken, async (req, res) => {
   try {
     const { completed = 'false', category } = req.query;

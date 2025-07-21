@@ -43,11 +43,56 @@ function App() {
     <Router>
       <SocketProvider>
         <Routes>
-          <Route path="/" element={!isAuthenticated ? <FamilyLanding /> : <Navigate to="/dashboard" />} />
-          <Route path="/create-family" element={!isAuthenticated ? <CreateFamily setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
-          <Route path="/join-family" element={!isAuthenticated ? <JoinFamily setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
-          <Route path="/login" element={!isAuthenticated ? <Login setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/dashboard" />} />
-          <Route path="/dashboard" element={isAuthenticated ? <Dashboard setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/" />} />
+          <Route
+            path="/"
+            element={
+              !isAuthenticated ? (
+                <FamilyLanding />
+              ) : (
+                <Navigate to="/dashboard" />
+              )
+            }
+          />
+          <Route
+            path="/create-family"
+            element={
+              !isAuthenticated ? (
+                <CreateFamily setIsAuthenticated={setIsAuthenticated} />
+              ) : (
+                <Navigate to="/dashboard" />
+              )
+            }
+          />
+          <Route
+            path="/join-family"
+            element={
+              !isAuthenticated ? (
+                <JoinFamily setIsAuthenticated={setIsAuthenticated} />
+              ) : (
+                <Navigate to="/dashboard" />
+              )
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              !isAuthenticated ? (
+                <Login setIsAuthenticated={setIsAuthenticated} />
+              ) : (
+                <Navigate to="/dashboard" />
+              )
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              isAuthenticated ? (
+                <Dashboard setIsAuthenticated={setIsAuthenticated} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
           <Route
             path="/grocery"
             element={

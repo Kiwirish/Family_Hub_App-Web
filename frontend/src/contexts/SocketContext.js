@@ -17,7 +17,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    
+    // frontend authenticates socket connection with token just as Axios does for HTTP connection
     if (token) {
       const newSocket = io('https://family-hub-app-web.onrender.com', {
         auth: {
